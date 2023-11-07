@@ -1,5 +1,30 @@
-from odoo import models
-
+from odoo import fields,models
+from odoo.tools import date_utils
 class EstateTest(models.Model):
-    _name = "estate_test"
+    _name = "estate.test"
     _description = "Nice description here."
+
+    name = fields.Char(required = True)
+    description = fields.Text()
+    postcode = fields.Char()
+    date_availability = fields.Date(copy = False, default = lambda self: fields.date.today() + date_utils.relativedelta(months=3))
+    expected_price = fields.Float(required = True)
+    selling_price = fields.Float(readonly = True, copy = False)
+    bedrooms = fields.Integer(default = 2)
+    living_area = fields.Integer()
+    facades = fields.Integer()
+    garage = fields.Boolean()
+    garden = fields.Boolean()
+    garden_area = fields.Integer()
+    garden_orientation = fields.Selection(
+        string='Garden Orientation',
+        selection=[('north', 'North'), ('south', 'South'), ('east', 'East'), ('west', 'West')],
+        help="Choose the direction of the garden")
+    active = True
+    state = fields.Selection(
+        string = 'State',
+        selection=[('new', 'New'), ('offer_received', 'Offer received'), ('offer_approved', 'offer Approved'), ('sold', 'Sold'),('canceled','Canceled')],
+        copy = False,
+        default="new",
+        )
+    property_type_id = fields.Many2one("estate.property.type", string="Property type")
