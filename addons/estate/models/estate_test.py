@@ -1,4 +1,4 @@
-from odoo import fields,models
+from odoo import api,fields,models
 from odoo.tools import date_utils
 class EstateTest(models.Model):
     _name = "estate.test"
@@ -28,3 +28,20 @@ class EstateTest(models.Model):
         default="new",
         )
     property_type_id = fields.Many2one("estate.property.type", string="Property type")
+    buyer_id = fields.Many2one("res.partner", string="Buyer")
+    salesperson_id = fields.Many2one("res.users", string="Salesperson")
+    tag_ids = fields.Many2many("estate.property.tag", string="Tags")
+    offer_ids = fields.One2many("estate.property.offer","property_id")
+    total_area = fields.Float(compute="_compute_total",string="Total area(m²)")
+    best_price = fields.Float(compute="_compute_best_price",string="Best price")
+
+    @api.depends("living_area","garden_area")
+    def _compute_total(self):
+        for record in self:
+            record.total_area =  record.living_area + record.garden_area
+
+
+    @api.depends("offer_ids.price")
+    def _compute_best_price(self):
+        for record in self:
+            record.best_price =  max(self.mapped("offer_ids.price"))

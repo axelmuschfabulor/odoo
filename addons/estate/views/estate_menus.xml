@@ -8,6 +8,7 @@
 
         <menuitem id="first_level_settings" name="Settings">
             <menuitem id="estate_property_type_menu_model_action" action="estate_property_type_model_action"/>
+            <menuitem id="estate_property_tag_menu_model_action" action="estate_property_tag_model_action"/>
         </menuitem>
 
     </menuitem>
