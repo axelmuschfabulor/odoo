@@ -1,5 +1,6 @@
 from odoo import api,fields,models
 from odoo.tools import date_utils
+from odoo.exceptions import UserError
 class EstateTest(models.Model):
     _name = "estate.test"
     _description = "Nice description here."
@@ -44,4 +45,38 @@ class EstateTest(models.Model):
     @api.depends("offer_ids.price")
     def _compute_best_price(self):
         for record in self:
-            record.best_price =  max(self.mapped("offer_ids.price"))
+            best_offer = self.mapped("offer_ids.price")
+            if len(best_offer) > 0:
+                record.best_price =  max(best_offer)
+            else:
+                record.best_price =  0
+
+    @api.onchange("garden")
+    def _onchange_partner_id(self):
+        if self.garden == True:
+            self.garden_area = 10
+            self.garden_orientation = 'north'
+        else:
+            self.garden_area = ''
+            self.garden_orientation = ''
+
+
+
+    def estate_property_sold(self):
+        for record in self:
+            print("sold pressed " + record.state)
+            if record.state == "canceled":
+                raise UserError("Canceled properties cannot be sold")
+            else:
+                record.state = "sold"
+        return True
+    def estate_property_cancel(self):
+        for record in self:
+            if record.state == "sold":
+                raise UserError("Sold properties cannot be canceled")
+            else:
+                record.state = "canceled"
+        return True
+    def estate_property_login(self):
+        print("Login")
+        return True
