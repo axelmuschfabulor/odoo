@@ -5,3 +5,12 @@ class EstateTest(models.Model):
     _description = "Property tags"
 
     name = fields.Char(required = True)
+
+
+    _sql_constraints = [
+        (
+            'unique_name',
+            'UNIQUE(name)',
+            'name needs to be unique',
+        ),
+    ]

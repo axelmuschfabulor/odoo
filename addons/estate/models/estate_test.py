@@ -1,6 +1,8 @@
 from odoo import api,fields,models
 from odoo.tools import date_utils
 from odoo.exceptions import UserError
+from odoo.exceptions import ValidationError
+from odoo.tools.float_utils import *
 class EstateTest(models.Model):
     _name = "estate.test"
     _description = "Nice description here."
@@ -36,6 +38,13 @@ class EstateTest(models.Model):
     total_area = fields.Float(compute="_compute_total",string="Total area(m²)")
     best_price = fields.Float(compute="_compute_best_price",string="Best price")
 
+    _sql_constraints = [
+        ('check_expected_price', 'CHECK(expected_price >= 0)',
+         'The expected_price needs to be possitive.'),
+        ('check_selling_price', 'CHECK(selling_price >= 0)',
+         'The selling_price needs to be possitive.')
+    ]
+
     @api.depends("living_area","garden_area")
     def _compute_total(self):
         for record in self:
@@ -61,7 +70,6 @@ class EstateTest(models.Model):
             self.garden_orientation = ''
 
 
-
     def estate_property_sold(self):
         for record in self:
             print("sold pressed " + record.state)
@@ -77,6 +85,18 @@ class EstateTest(models.Model):
             else:
                 record.state = "canceled"
         return True
-    def estate_property_login(self):
-        print("Login")
-        return True
+
+
+    @api.constrains('selling_price','expected_price')
+    def _check_date_end(self):
+        for record in self:
+            if float_is_zero(record.selling_price,2):
+                print('nothing')
+            else:
+                percentage = (record.selling_price/record.expected_price)*100
+                print(record.selling_price)
+                print(record.expected_price)
+                print(percentage)
+                if percentage < 90 or record.selling_price == 0:
+                    raise ValidationError("Selling price must be at least 90% of the expected price")
+        # all records passed the test, don't return anything
